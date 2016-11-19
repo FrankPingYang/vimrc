@@ -1,158 +1,65 @@
-" Author:     Phil Yang <phil.yang@technicolor.com>
-" Modified:   2016 Nov 14th
-"
-" Adapted from Bram Moolenaar's example vimrc.
 
-" ----- General Settings  -----------------------------------------------------
-
-" Use Vim settings, rather than Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
+" Gotta be first
 set nocompatible
 
-" allow backspacing over everything in insert mode
+filetype off
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'tomasr/molokai'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'scrooloose/nerdtree'
+Plugin 'jistr/vim-nerdtree-tabs'
+Plugin 'vim-syntastic/syntastic'
+Plugin 'xolox/vim-misc'
+Plugin 'majutsushi/tagbar'
+Plugin 'xolox/vim-easytags'
+Plugin 'kien/ctrlp.vim'
+Plugin 'vim-scripts/a.vim'
+" Plugin 'Valloric/YouCompleteMe'
+
+" ----- working with Git -----
+Plugin 'airblade/vim-gitgutter'
+Plugin 'tpope/vim-fugitive'
+
+" ----- other text editing features -----
+Plugin 'Raimondi/delimitMate'
+Plugin 'christoomey/vim-tmux-navigator'
+Plugin 'jez/vim-c0'
+Plugin 'jez/vim-ispc'
+Plugin 'kchmck/vim-coffee-script'
+
+call vundle#end()
+
+filetype plugin indent on
+
+" --- General settings ---
 set backspace=indent,eol,start
+set ruler
+set number
+set showcmd
+set incsearch
+set hlsearch
 
-set history=1000       " keep 1000 lines of command line history
-set number             " line numbers
-set ruler              " show the cursor position all the time
-set showcmd            " display incomplete commands
-set incsearch          " do incremental searching
-set linebreak          " wrap lines on 'word' boundaries
-set scrolloff=3        " don't let the cursor touch the edge of the viewport
-set splitright         " Vertical splits use right half of screen
-set timeoutlen=100     " Lower ^[ timeout
-set fillchars=fold:\ , " get rid of obnoxious '-' characters in folds
-set tildeop            " use ~ to toggle case as an operator, not a motion
-if exists('&breakindent')
-  set breakindent      " Indent wrapped lines up to the same level
-endif
+syntax on
 
-" Tab settings
-set expandtab          " Expand tabs into spaces
-set tabstop=2          " default to 2 spaces for a hard tab
-set softtabstop=2      " default to 2 spaces for the soft tab
-set shiftwidth=2       " for when <TAB> is pressed at the beginning of a line
+set mouse=a
 
-" ----- Convenience commands and cabbrev's ------------------------------------
+" We need this for plugins like Syntastic and vim-gitgutter which put symbols
+" in the sign colum.
+hi clear SignColumn
 
-" Make these commonly mistyped commands still work
-command! WQ wq
-command! Wq wq
-command! Wqa wqa
-command! W w
-command! Q q
+" ----- Plugin-Specific Settings --------------------------------------
 
-" Use :C to clear hlsearch
-command! C nohlsearch
-
-" Force write readonly files using sudo
-command! WS w !sudo tee %
-
-" open help in a new tab
-cabbrev help tab help
-
-" My LaTeX Makefiles all have a `view` target which compiles and opens the PDF
-" This command saves the file then runs that target
-command! Wv w | make view
-command! WV w | make view
-
-" ----- Custom keybindings ----------------------------------------------------
-
-" Make navigating long, wrapped lines behave like normal lines
-noremap <silent> k gk
-noremap <silent> j gj
-noremap <silent> 0 g0
-noremap <silent> $ g$
-noremap <silent> ^ g^
-noremap <silent> _ g_
-
-" use 'Y' to yank to the end of a line, instead of the whole line
-noremap <silent> Y y$
-
-" take first suggested spelling as correct spelling and replace
-noremap <silent> z! z=1<CR><CR>
-" NOTE: This feature requires a longer timeoutlen. To use it, up the
-"       timeoutlen above.
-
-" ----- Terminal-as-GUI settings ----------------------------------------------
-
-" In many terminal emulators the mouse works just fine, thus enable it.
-if has('mouse')
-  set mouse=a
-endif
-
-" Switch syntax highlighting on, when the terminal has colors
-" Also switch on highlighting the last used search pattern.
-if &t_Co > 2 || has("gui_running")
-  syntax on
-  set hlsearch
-endif
-
-" ----- Pathogen and Plugin Settings ------------------------------------------
-
-" Pathogen is in a non-standard location: modify the rtp to reflect that
-set nocp
+" ----- pathogen setting -----
 set rtp+=~/.vim/bundle/pathogen
-
-" Let Pathogen take over the runtimepath to make plugins in ~/.vim/bundle work
+" Let pathogen take over the runtimepath to make plugins in ~/.vim/bundle
+" work
 execute pathogen#infect()
-
-" Generate all helptags on startup
-Helptags
-
-" ----- bling/vim-airline settings -----
-" Fancy arrow symbols, requires a patched font
-let g:airline_powerline_fonts = 1
-" Show PASTE if in paste mode
-let g:airline_detect_paste=1
-" Always show statusbar
-set laststatus=2
-" Slightly modify the theme colors
-let g:airline_theme_patch_func = 'AirlineThemePatch'
-function! AirlineThemePatch(palette)
-  if g:airline_theme == 'solarized' && g:solarized_termcolors == 16
-    " normal mode background: s:base03
-    let a:palette.normal.airline_a[2] = 8
-    " normal mode foreground: s:green
-    let a:palette.normal.airline_a[3] = 2
-
-    " line no. background: s:base03
-    let a:palette.normal.airline_z[2] = 8
-    " line no. foreground: s:green
-    let a:palette.normal.airline_z[3] = 2
-  endif
-endfunction
-
-" ----- Raimondi/delimitMate settings -----
-let delimitMate_expand_cr = 1
-augroup mydelimitMate
-  au!
-  au FileType markdown let b:delimitMate_nesting_quotes = ["`"]
-  au FileType tex let b:delimitMate_quotes = ""
-  au FileType tex let b:delimitMate_matchpairs = "(:),[:],{:},`:'"
-  au FileType python let b:delimitMate_nesting_quotes = ['"', "'"]
-augroup END
-
-" ----- majutsushi/tagbar settings -----
-" Open/close tagbar with \b
-nmap <silent> <leader>b :TagbarToggle<CR>
-"autocmd BufEnter * nested :call tagbar#autoopen(0)
-
-" ----- xolox/vim-easytags settings -----
-set tags=./tags;,~/.vimtags
-let g:easytags_events = ['BufReadPost', 'BufWritePost']
-let g:easytags_async = 1
-let g:easytags_dynamic_files = 2
-let g:easytags_resolve_links = 1
-let g:easytags_suppress_ctags_warning = 1
-
-" ----- scrooloose/syntastic settings -----
-let g:syntastic_error_symbol = '✘'
-let g:syntastic_warning_symbol = "▲"
-augroup mySyntastic
-  au!
-  au FileType tex let b:syntastic_mode = "passive"
-augroup END
 
 " ----- altercation/vim-colors-solarized settings -----
 " Toggle this to "light" for light colorscheme
@@ -161,30 +68,69 @@ set background=dark
 " Uncomment the next line if your terminal is not configured for solarized
 "let g:solarized_termcolors=256
 
-" Remove the underline Solarized places under Folded previews
-hi! Folded cterm=NONE term=NONE
-
 " Set the colorscheme
 colorscheme solarized
 
-" ----- airblade/vim-gitgutter settings -----
-hi clear SignColumn
-let g:airline#extensions#hunks#non_zero_only = 1
+" ----- bling/vim-airline settings -----
+" Always show statusbar
+ set laststatus=2
+
+" Fancy arrow symbols, requires a patched font
+" To install a patched font, run over to
+"     https://github.com/abertsch/Menlo-for-Powerline
+" download all the .ttf files, double-click on them and click "Install"
+" Finally, uncomment the next line
+let g:airline_powerline_fonts = 1
+
+" Show PASTE if in paste mode
+let g:airline_detect_paste=1
+
+" Show airline for tabs too
 let g:airline#extensions#tabline#enabled = 1
 
-" ----- jez/vim-superman settings -----
-" better man page support
-noremap K :SuperMan <cword><CR>
+" Use the solarized theme for the Airline status bar
+let g:airline_theme='solarized'
 
-" ----- jistr/vim-nerdtree-tabs -----
+" ----- jistr/vim-nerdtree-tabs -------
 " Open/close NERDTree Tabs with \t
-nmap <silent> <leader>t :NERDTreeTabsToggle<CR>
+nmap <silent><leader>t :NERDTreeTabsToggle<CR>
+" To have NERDTree always open on startup
+let g:nerdtree_tabs_open_on_console_strartup = 1
 
-" ----- Builtin Vim plugins -----
-" When viewing directories, show nested tree mode
-let g:netrw_liststyle=3
-" Don't create .netrwhist files
-let g:netrw_dirhistmax = 0
+" ----- scrooloose/syntastic settings -----
+let g:syntastic_error_symbol = '✘'
+let g:syntastic_warning_symbol = "▲"
+augroup mySyntastic
+	au!
+	au FileType tex let b:syntastic_mode = "passive"
+augroup END
 
+" ------ xolox/vim-easytags settings -----
+" where to look for tags files
+set tags=./tags;,~/.vimtags
+" Sensible defaults
+let g:easytag_events = ['BufReadPost', 'BufWritePost']
+let g:easytags_async = 1
+let g:easytags_dynamic_files = 2
+let g:easytags_resolve_links = 1
+let g:easytags_suppress_ctags_warning = 1
 
-" -----------------------------------------------------------------------------
+" ------ majutsushi/tagbar settings -----
+" Open/close tagbar with \b
+nmap <silent><leader>b :TagbarToggle<CR>
+" Uncomment to open tagbar automatically whenever possible
+" autocmd Bufenter * nested :call tagbar#autoopen(0)
+"
+" ------ airblade/vim-gitgutter settings -----
+" In vim-airline, only display "hunks" if the diff is non-zero
+let g:airline#extensions#hunks#non_zero_only = 1
+
+" ------ Raimondi/delimitMate settings -----
+let delimitMate_expand_cr = 1
+augroup mydelimitMate
+	au!
+	au FileType markdown let b:delimitMate_nesting_quotes = ["`"]
+	au FileType tex let b:delimitMate_quotes = ""
+	au FileType tex let b:delimitMate_matchpairs = "(:),[:],{:},`:'"
+augroup END
+
